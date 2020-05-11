@@ -1,4 +1,4 @@
-FROM golang:1.14-alpine as builder
+FROM golang:alpine as builder
 
 ARG GITHUB_TOKEN
 
@@ -13,8 +13,9 @@ ADD . .
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o dice-fetcher ./cmd
 
 FROM scratch
-COPY --from=builder /go/src/build/dice-fetcher /app/
-COPY --from=builder /go/src/build/trxlt.save.default /app/trxlt.save
 WORKDIR /app
+COPY --from=builder /go/src/build/dice-fetcher /app/
+COPY --from=builder /go/src/build/trxlt.save.default /app/
+RUN mv trxlt.save.default trxlt.save
 
-CMD ["./dice-fetcher"]
+ENTRYPOINT ./dice-fetcher
